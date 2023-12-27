@@ -18,15 +18,15 @@ const db = mysql.createConnection({
 /** "get" = obtener de la base de datos */
 app.get("/empleados", (req, res) => {
   const query = "SELECT * FROM empleados_crud.empleados";
-  db.query( query,
-    (err, result) => {
-      if (err) {
-        console.log(err);
-      } else {
-        res.json(result); /** "result" retorna los resultados de la base de datos */
-      }
+  db.query(query, (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.json(
+        result
+      ); /** "result" retorna los resultados de la base de datos */
     }
-  );
+  });
 });
 
 /** Peticion de guardar */
@@ -51,8 +51,32 @@ app.post("/create", (req, res) => {
   );
 });
 
+/** Peticion para actualizar */
+/** "update" = obtener de la base de datos */
+app.put("/update", (req, res) => {
+  const empleadoId = req.body.id;
+  const query =
+    "UPDATE empleados SET nombre=?,edad=?,pais=?,cargo=?,anios=? WHERE id=?";
+  const values = [
+    req.body.nombre,
+    req.body.edad,
+    req.body.pais,
+    req.body.cargo,
+    req.body.anios,
+  ];
+  db.query(query, [...values, empleadoId], (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.json(
+        "Empleado actualizado con éxito!!"
+      ); /** "result" retorna los resultados de la base de datos */
+    }
+  });
+});
 
+const local = 8800;
 /** Esto crea la conexion de node */
-app.listen(8800, () => {
-  console.log(`Connected to backend port: 8800`);
+app.listen(local, () => {
+  console.log(`Connected to backend port: ${local}`);
 });
