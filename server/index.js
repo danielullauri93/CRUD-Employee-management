@@ -52,7 +52,7 @@ app.post("/create", (req, res) => {
 });
 
 /** Peticion para actualizar */
-/** "update" = obtener de la base de datos */
+/** "update" = actualizar los datos ingresados */
 app.put("/update", (req, res) => {
   const empleadoId = req.body.id;
   const query =
@@ -70,6 +70,23 @@ app.put("/update", (req, res) => {
     } else {
       res.json(
         "Empleado actualizado con éxito!!"
+      ); /** "json" retorna el texto */
+    }
+  });
+});
+
+/** Peticion para eliminar */
+/** "dele" = elimina datos de la base */
+app.delete("/delete/:id", (req, res) => {
+  /** No olvidad que en la ruta debe ir /:id */
+  const empleadoId = req.params.id; /** Tiene que ir params en ves de body */
+  const query = "DELETE FROM empleados WHERE id = ?";
+  db.query(query, [empleadoId], (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(
+        result
       ); /** "result" retorna los resultados de la base de datos */
     }
   });

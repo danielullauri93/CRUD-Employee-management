@@ -3,6 +3,8 @@ import { useState } from "react";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 
+import Swal from "sweetalert2"; /** Pagina para las notificaciones vistosas: https://sweetalert2.github.io/ */
+
 function App() {
   const [nombre, setNombre] = useState("");
   const [edad, setEdad] = useState();
@@ -25,8 +27,14 @@ function App() {
         anios: anios,
       })
       .then(() => {
-        alert("Empleado registrado");
         limpiarCampos();
+        Swal.fire({
+          title: "<strong>Registro Exitoso!</strong>",
+          html: `<i>EL empleado/a <h6>${nombre}</h6> fue registrado.</i>`,
+          icon: "success",
+          showConfirmButton: false,
+          timer: 2500,
+        });
       });
   };
 
@@ -43,6 +51,71 @@ function App() {
       .then(() => {
         getEmpleados();
         limpiarCampos();
+        Swal.fire({
+          title: "<strong>Actualización Exitosa!</strong>",
+          html: `<i>EL empleado/a <div><h6>${nombre}</h6></div> fue actualizado.</i>`,
+          icon: "success",
+          showConfirmButton: false,
+          timer: 2500,
+        });
+      });
+  };
+
+  const deleteEmpleados = (val) => {
+    const swalWithBootstrapButtons = Swal.mixin({
+      customClass: {
+        confirmButton: "btn btn-success m-2",
+        cancelButton: "btn btn-danger m-2",
+      },
+      buttonsStyling: false,
+    });
+    swalWithBootstrapButtons
+      .fire({
+        title: `Deseas eliminar a ${val.nombre}?`,
+        text: "No podrás revertir esto!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Sí, eliminar!",
+        cancelButtonText: "No, cancelar!",
+        reverseButtons: true,
+      })
+      .then((result) => {
+        if (result.isConfirmed) {
+          axios.delete(`http://localhost:8800/delete/${val.id}`).then(() => {
+            getEmpleados();
+            limpiarCampos();
+            // window.location.reload();
+          });
+          swalWithBootstrapButtons.fire({
+            title: "Eliminado!",
+            text: `Se ha eliminado a ${val.nombre}.`,
+            icon: "success",
+            showConfirmButton: false,
+            timer: 3000,
+          });
+        } else if (
+          /* Read more about handling dismissals below */
+          result.dismiss === Swal.DismissReason.cancel
+        ) {
+          swalWithBootstrapButtons.fire({
+            title: "Cancelado",
+            text: "Datos a salvo :)",
+            icon: "error",
+            showConfirmButton: false,
+            timer: 3000,
+          });
+        }
+      })
+      .catch((err) => {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "No se pudo eliminar!",
+          footer:
+            JSON.parse(JSON.stringify(err)).message === "Network Error"
+              ? "Error del servidor"
+              : JSON.parse(JSON.stringify(err)).message,
+        });
       });
   };
 
@@ -53,6 +126,7 @@ function App() {
     setCargo("");
     setAnios("");
     setId("");
+    setEditar(false);
   };
 
   const editarEmpleado = (val) => {
@@ -220,7 +294,11 @@ function App() {
                     >
                       Editar
                     </button>
-                    <button type="button" className="btn btn-danger">
+                    <button
+                      type="button"
+                      onClick={() => deleteEmpleados(val)}
+                      className="btn btn-danger"
+                    >
                       Eliminar
                     </button>
                   </div>
